@@ -1,0 +1,226 @@
+# Intro to Data Science - HW 5
+##### Copyright Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+```{r}
+# Enter your name here: Diana Perez
+```
+
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+# 2. I did this homework with help from the book and the professor and these Internet sources:
+# 3. I did this homework with help from <Name of another student> but did not cut and paste any code.
+```
+
+**This module:** **Data visualization** is important because many people can make sense of data more easily when it is presented in graphic form. As a data scientist, you will have to present complex data to decision makers in a form that makes the data interpretable for them. From your experience with Excel and other tools, you know that there are a variety of **common data visualizations** (e.g., pie charts). How many of them can you name? <br>
+
+The most powerful tool for data visualization in R is called **ggplot**. Written by computer/data scientist **Hadley Wickham**, this **“graphics grammar”** tool builds visualizations in layers. This method provides immense flexibility, but takes a bit of practice to master.
+
+
+## Step 1: Make a copy of the data
+
+A.	Read the **who** dataset from this URL: https://intro-datascience.s3.us-east-2.amazonaws.com/who.csv <br>
+into a new dataframe called **tb**. 
+
+Your new dataframe, tb, contains a so-called **multivariate time series**: a sequence of measurements on 23 Tuberculosis-related (TB) variables captured repeatedly over time (1980-2013). Familiarize yourself with the nature of the 23 variables by consulting the dataset’s codebook which can be found here: https://intro-datascience.s3.us-east-2.amazonaws.com/TB_data_dictionary_2021-02-06.csv.
+
+
+```{r}
+library(readr)
+tb <- read.csv("https://intro-datascience.s3.us-east-2.amazonaws.com/who.csv")
+print(head(tb))
+```
+
+B.	How often were these measurements taken (in other words, at what frequency were the variables measured)? Put your answer in a comment. 
+
+
+```{r}
+#Yearly from 1980 to 2013
+```
+
+## Step 2: Clean-up the NAs and create a subset
+
+A.	Let's clean up the iso2 attribute in **tb** 
+
+Hint: use *is.na()* -- well use *! is.na()* 
+
+
+```{r}
+tb <- tb[!is.na(tb$iso2),]
+```
+
+B. Create a subset of **tb** containing **only the records for Canada ("CA" in the iso2 variable)**. Save it in a new dataframe called **tbCan**. Make sure this new df has **29 observations and 23 variables**.
+
+
+```{r}
+tbCan <- subset(tb, iso2 == "CA")
+dim(tbCan)
+```
+
+C. A simple method for dealing with small amounts of **missing data** in a numeric variable is to **substitute the mean of the variable in place of each missing datum**. <br>
+This expression locates (and reports to the console) all the missing data elements in the variable measuring the **number of positive pulmonary smear tests for male children 0-4 years old** (there are 26 data points missing)
+
+
+```{r}
+
+mean_value <- mean(tbCan$new_sp_m04, na.rm = TRUE)
+
+tbCan$new_sp_m04[is.na(tbCan$new_sp_m04)] <- mean_value
+
+sum(is.na(tbCan$new_sp_m04))  
+```
+
+
+    Error in eval(expr, envir, enclos): object 'tbCan' not found
+    Traceback:
+
+
+
+D.	Write a comment describing how that statement works.
+
+
+```{r}
+#It checks in the dataframe tbcan in the column new_sp_m04 and replaces it if it is NA with the mean
+```
+
+E.	Write 4 more statements to check if there is missing data for the number of positive pulmonary smear tests for: **male and female** children 0-14 years old (**new_sp_m014** and **new_sp_f014**), and **male and female citizens 65 years of age and older**, respectively. What does empty output suggest about the number of missing observations?
+
+
+```{r}
+tbCan$new_sp_m014[is.na(tbCan$new_sp_m014)]  # Male children 0-14 years old
+tbCan$new_sp_f014[is.na(tbCan$new_sp_f014)]  # Female children 0-14 years old
+tbCan$new_sp_m65[is.na(tbCan$new_sp_m65)]    # Male citizens 65+
+tbCan$new_sp_f65[is.na(tbCan$new_sp_f65)]    # Female citizens 65+
+```
+
+There is an R package called **imputeTS** specifically designed to repair missing values in time series data. We will use this instead of mean substitution.  <br>
+The **na_interpolation()** function in this package takes advantage of a unique characteristic of time series data: **neighboring points in time can be used to “guess” about a missing value in between**.
+
+F.	Install the **imputeTS** package (if needed) and use **na_interpolation( )** on the variable from part C. Don’t forget that you need to save the results back to the **tbCan** dataframe. Also update any attribute discussed in part E (if needed).
+
+
+```{r}
+install.packages("imputeTS")
+library(imputeTS)
+tbCan$new_sp_m04 <- na_interpolation(tbCan$new_sp_m04)
+tbCan$new_sp_m014 <- na_interpolation(tbCan$new_sp_m014)
+tbCan$new_sp_f014 <- na_interpolation(tbCan$new_sp_f014)
+tbCan$new_sp_m65 <- na_interpolation(tbCan$new_sp_m65)
+tbCan$new_sp_f65 <- na_interpolation(tbCan$new_sp_f65)
+```
+
+G.	Rerun the code from C and E above to check that all missing data have been fixed. 
+
+
+```{r}
+# Confirming no missing values remain
+sum(is.na(tbCan$new_sp_m04))    # Should be 0
+sum(is.na(tbCan$new_sp_m014))   # Should be 0
+sum(is.na(tbCan$new_sp_f014))   # Should be 0
+sum(is.na(tbCan$new_sp_m65))    # Should be 0
+sum(is.na(tbCan$new_sp_f65))    # Should be 0
+```
+
+## Step 3: Use ggplot to explore the distribution of each variable
+**Don’t forget to install and library the ggplot2 package.** Then: <br>
+H.	Create a histogram for **new_sp_m014**. Be sure to add a title and briefly describe what the histogram means in a comment.
+
+
+```{r}
+library(ggplot2)
+ggplot(tbCan, aes(x = new_sp_m014)) +
+  geom_histogram(binwidth = 10, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of New Positive Pulmonary Smear Tests (Male Children 0-14)") +
+  theme_minimal()
+```
+
+I.	Create histograms (using ggplot) of each of the other three variables from E with ggplot( ). <br>
+Which parameter do you need to adjust to make the other histograms look right?
+
+
+```{r}
+# Histogram for new_sp_f014
+ggplot(tbCan, aes(x = new_sp_f014)) +
+  geom_histogram(binwidth = 10, fill = "lightcoral", color = "black") +
+  labs(title = "Histogram of New Positive Pulmonary Smear Tests (Female Children 0-14)") +
+  theme_minimal()
+
+# Histogram for new_sp_m65
+ggplot(tbCan, aes(x = new_sp_m65)) +
+  geom_histogram(binwidth = 10, fill = "lightgreen", color = "black") +
+  labs(title = "Histogram of New Positive Pulmonary Smear Tests (Male 65+)") +
+  theme_minimal()
+
+# Histogram for new_sp_f65
+ggplot(tbCan, aes(x = new_sp_f65)) +
+  geom_histogram(binwidth = 10, fill = "lightpink", color = "black") +
+  labs(title = "Histogram of New Positive Pulmonary Smear Tests (Female 65+)") +
+  theme_minimal()
+```
+
+## Step 4: Explore how the data changes over time
+J.	These data were collected in a period of several decades (1980-2013). You can thus observe changes over time with the help of a line chart. Create a **line chart**, with **year** on the X-axis and **new_sp_m014** on the Y-axis.
+
+
+```{r}
+ggplot(tbCan, aes(x = year, y = new_sp_m014)) +
+  geom_line(color = "blue") +
+  labs(title = "Trends in Positive Pulmonary Smear Tests (Male Children 0-14)", 
+       x = "Year", y = "Positive Tests (Male Children 0-14)") +
+  theme_minimal()
+```
+
+K.	Next, create similar graphs for each of the other three variables. Change the **color** of the line plots (any color you want).
+
+
+```{r}
+# Line chart for new_sp_f014
+ggplot(tbCan, aes(x = year, y = new_sp_f014)) +
+  geom_line(color = "red") +
+  labs(title = "Trends in Positive Pulmonary Smear Tests (Female Children 0-14)", x = "Year", y = "Positive Tests") +
+  theme_minimal()
+
+# Line chart for new_sp_m65
+ggplot(tbCan, aes(x = year, y = new_sp_m65)) +
+  geom_line(color = "green") +
+  labs(title = "Trends in Positive Pulmonary Smear Tests (Male 65+)", x = "Year", y = "Positive Tests") +
+  theme_minimal()
+
+# Line chart for new_sp_f65
+ggplot(tbCan, aes(x = year, y = new_sp_f65)) +
+  geom_line(color = "purple") +
+  labs(title = "Trends in Positive Pulmonary Smear Tests (Female 65+)", x = "Year", y = "Positive Tests") +
+  theme_minimal()
+```
+
+L.	Using vector math, create a new variable by combining the numbers from **new_sp_m014** and **new_sp_f014**. Save the resulting vector as a new variable in the **tbCan** df called **new_sp_combined014**. This new variable represents the number of positive pulmonary smear tests for male AND female children between the ages of 0 and 14 years of age. Do the same for SP **tests among citizens 65 years of age and older** and save the resulting vector in the tbCan variable called **new_sp_combined65**.
+
+
+```{r}
+tbCan$new_sp_combined014 <- tbCan$new_sp_m014 + tbCan$new_sp_f014
+tbCan$new_sp_combined65 <- tbCan$new_sp_m65 + tbCan$new_sp_f65
+```
+
+M.	Finally, create a **scatter plot**, showing **new_sp_combined014** on the x axis, **new_sp_combined65** on the y axis, and having the **color and size** of the point represent **year**.
+
+
+```{r}
+ggplot(tbCan, aes(x = new_sp_combined014, y = new_sp_combined65, color = year, size = year)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Scatter Plot of Combined Positive Pulmonary Smear Tests",
+       x = "Combined Positive Tests (Children 0-14)",
+       y = "Combined Positive Tests (Citizens 65+)") +
+  theme_minimal() +
+  scale_color_viridis_c()  # Optional color scale for better year representation
+```
+
+N.	Interpret this visualization – what insight does it provide?
+The scatter plot shows the relationship between the number of positive smear tests in younger children (0-14) and older citizens (65+). Points representing later years are typically larger in size and may follow a trend. The visualization may indicate how test rates among younger and older age groups correlate over time, providing insight into whether disease in children might be associated with older age groups in Canada.
+
+
+```{r}
+
+```

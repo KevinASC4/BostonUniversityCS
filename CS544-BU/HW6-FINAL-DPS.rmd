@@ -1,0 +1,191 @@
+# Intro to Data Science - HW 6
+##### Copyright Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here: 
+```
+
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+# 2. I did this homework with help from the book and the professor and these Internet sources:
+# 3. I did this homework with help from <Name of another student> but did not cut and paste any code.
+```
+
+Last assignment we explored **data visualization** in R using the **ggplot2** package. This homework continues to use ggplot, but this time, with maps.  In addition, we will merge datasets using the built-in **merge( )** function, which provides a similar capability to a **JOIN in SQL** (don't worry if you do not know SQL). Many analytical strategies require joining data from different sources based on a **“key”** – a field that two datasets have in common. 
+
+## Step 1: Load the population data
+
+A.	Read the following JSON file, https://intro-datascience.s3.us-east-2.amazonaws.com/cities.json and store it in a variable called **pop**.
+
+Examine the resulting pop dataframe and add comments explaining what each column contains.
+
+
+
+```{r}
+library(jsonlite)
+
+# Read the JSON file
+pop <- fromJSON("https://intro-datascience.s3.us-east-2.amazonaws.com/cities.json")
+
+# Examine the structure of the dataframe
+str(pop)
+```
+
+B.	Calculate the **average population** in the dataframe. Why is using mean() directly not working? Find a way to correct the data type of this variable so you can calculate the average (and then calculate the average)
+
+Hint: use **str(pop)** or **glimpse(pop)** to help understand the dataframe
+
+
+```{r}
+
+pop$population <- as.numeric(pop$population)
+
+average_population <- mean(pop$population, na.rm = TRUE)
+average_population
+```
+
+C.	What is the population of the smallest city in the dataframe? Which state is it in?
+
+
+```{r}
+min_population <- min(pop$population, na.rm = TRUE)
+smallest_city <- pop[pop$population == min_population, ]
+smallest_city
+```
+
+## Step 2: Merge the population data with the state name data
+
+D)	Read in the state name .csv file from the URL below into a dataframe named **abbr** (for "abbreviation") – make sure to use the read_csv() function from the tidyverse package: <br>
+https://intro-datascience.s3.us-east-2.amazonaws.com/statesInfo.csv
+
+
+
+```{r}
+install.packages("tidyverse")
+library(tidyverse)
+
+# Read the CSV file into a dataframe
+abbr <- read_csv("https://intro-datascience.s3.us-east-2.amazonaws.com/statesInfo.csv")
+```
+
+E)	To successfully merge the dataframe **pop** with the **abbr** dataframe, we need to identify a **column they have in common** which will serve as the **“key”** to merge on. One column both dataframes have is the **state column**. The only problem is the slight column name discrepancy – in **pop**, the column is called **“state”** and in **abbr** – **“State.”** These names need to be reconciled for the merge() function to work. Find a way to rename **abbr’s “State”** to **match** the **state column in pop**.    
+
+
+```{r}
+abbr <- rename(abbr, state = State)
+```
+
+F)	Merge the two dataframes (using the **‘state’ column** from both dataframes), storing the resulting dataframe in **dfNew**.
+
+
+```{r}
+dfNew <- merge(pop, abbr, by = "state")
+```
+
+G)	Review the structure of **dfNew** and explain the columns (aka attributes) in that dataframe.
+The dfNew dataframe now has:
+state: State abbreviations.
+city: City names.
+population: Population of each city.
+Additional columns from abbr that provide more detailed information about each state.
+
+```{r}
+str(dfNew)
+```
+
+## Step 3: Visualize the data
+
+H)	Plot points (on top of a map of the US) for **each city**. Have the **color** represent the **population**.
+
+
+```{r}
+library(ggplot2)
+install.packages("maps")
+library(maps)
+
+# Base map of the US
+us_map <- map_data("state")
+
+# Plot points for each city
+ggplot() +
+  geom_polygon(data = us_map, aes(x = long, y = lat, group = group), fill = "white", color = "black") +
+  geom_point(data = dfNew, aes(x = longitude, y = latitude, color = population), size = 2) +
+  scale_color_viridis_c() +
+  labs(title = "US Cities by Population") +
+  theme_minimal()
+```
+
+I)	Add a block comment that criticizes the resulting map. It’s not very good.
+
+
+```{r}
+#This map isn’t very informative for identifying city populations because the #color scale is too broad, making it difficult to see differences
+#the city points may be crowded in densely populated areas
+
+
+```
+
+## Step 4: Group by State
+
+
+J)	Use group_by and summarise to make a dataframe of state-by-state population. Store the result in **dfSimple**.
+
+
+```{r}
+dfSimple <- dfNew %>%
+  group_by(state) %>%
+  summarise(total_population = sum(population, na.rm = TRUE))
+
+dfSimple
+```
+
+K)	Name the most and least populous states in **dfSimple** and show the code you used to determine them.
+
+
+```{r}
+most_populous <- dfSimple[which.max(dfSimple$total_population), ]
+least_populous <- dfSimple[which.min(dfSimple$total_population), ]
+
+most_populous
+least_populous
+```
+
+## Step 5: Create a map of the U.S.,  with the color of the state representing the state population
+
+L) Make sure to expand the limits correctly and that you have used **coord_map** appropriately.
+
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(maps)
+
+state_map <- map_data("state") %>%
+  rename(state = region) %>%
+  left_join(dfSimple, by = "state")
+
+ggplot(state_map, aes(x = long, y = lat, group = group, fill = total_population)) +
+  geom_polygon(color = "yellow", size = 0.3) +
+  coord_map() +
+  scale_fill_viridis_c(option = "plasma", direction = -1, 
+                       name = "Population", 
+                       labels = scales::comma) +
+  labs(
+    title = "Population Distribution by State in the U.S.",
+    subtitle = "States colored by total population, highlighting disparities",
+    caption = "Data Source: U.S. Cities and States"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 12),
+    plot.caption = element_text(size = 10)
+  )
+```

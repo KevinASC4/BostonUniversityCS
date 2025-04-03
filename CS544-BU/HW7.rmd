@@ -1,0 +1,100 @@
+# Intro to Data Science HW 7
+##### Copyright Jeffrey Stanton, Jeffrey Saltz, and Jasmina Tacheva
+
+
+```{r}
+# Enter your name here: 
+```
+
+### Attribution statement: (choose only one and delete the rest)
+
+
+```{r}
+# 1. I did this homework by myself, with help from the book and the professor.
+# 2. I did this homework with help from the book and the professor and these Internet sources:
+# 3. I did this homework with help from <Name of another student> but did not cut and paste any code.
+```
+
+The chapter on **linear models** (“Lining Up Our Models”) introduces **linear predictive modeling** using the tool known as **multiple regression**. The term “multiple regression” has an odd history, dating back to an early scientific observation of a phenomenon called **“regression to the mean.”** These days, multiple regression is just an interesting name for using **linear modeling** to assess the **connection between one or more predictor variables and an outcome variable**. 
+
+
+<br>In this exercise, you will **predict Ozone air levels from three predictors**.
+
+A.	We will be using the **airquality** data set available in R. Copy it into a dataframe called **air** and use the appropriate functions to **summarize the data**. 
+
+
+```{r}
+
+```
+
+B.	In the analysis that follows, **Ozone** will be considered as the **outcome variable**, and **Solar.R**, **Wind**, and **Temp** as the **predictors**. Add a comment to briefly explain the outcome and predictor variables in the dataframe using **?airquality**.
+
+
+```{r}
+
+```
+
+C.	Inspect the outcome and predictor variables – are there any missing values? Show the code you used to check for that.
+
+
+```{r}
+
+```
+
+D.	Use the **na_interpolation()** function from the **imputeTS package** (remember this was used in a previous HW) to fill in the missing values in each of the 4 columns. Make sure there are no more missing values using the commands from Step C.
+
+
+```{r}
+
+```
+
+E.	Create **3 bivariate scatterplots (X-Y) plots** (using ggplot), for each of the predictors with the outcome. **Hint:** In each case, put **Ozone on the Y-axis**, and a **predictor on the X-axis**. Add a comment to each, describing the plot and explaining whether there appears to be a **linear relationship** between the outcome variable and the respective predictor.
+
+
+```{r}
+
+```
+
+F.	Next, create a **simple regression model** predicting **Ozone based on Wind**, using the **lm( )** command. In a comment, report the **coefficient** (aka **slope** or **beta weight**) of **Wind** in the regression output and, **if it is statistically significant**, **interpret it** with respect to **Ozone**. Report the **adjusted R-squared** of the model and try to explain what it means. 
+
+
+```{r}
+
+```
+
+G.	Create a **multiple regression model** predicting **Ozone** based on **Solar.R**, **Wind**, and **Temp**.<br> **Make sure to include all three predictors in one model – NOT three different models each with one predictor.**
+
+
+```{r}
+
+```
+
+H.	Report the **adjusted R-Squared** in a comment – how does it compare to the adjusted R-squared from Step F? Is this better or worse? Which of the predictors are **statistically significant** in the model? In a comment, report the coefficient of each predictor that is statistically significant. Do not report the coefficients for predictors that are not significant.
+
+
+```{r}
+
+```
+
+I.	Create a one-row data frame like this: 
+
+
+```{r}
+predDF <- data.frame(Solar.R=290, Wind=13, Temp=61)
+```
+
+ and use it with the **predict( )** function to predict the **expected value of Ozone**:
+
+
+```{r}
+
+```
+
+J.	Create an additional **multiple regression model**, with **Temp** as the **outcome variable**, and the other **3 variables** as the **predictors**. 
+
+Review the quality of the model by commenting on its **adjusted R-Squared**.  
+
+
+```{r}
+
+```
