@@ -1,0 +1,57 @@
+{
+    "_id" : "",
+    "first_name" : "",
+    "last_name" : "",
+    "initial" : "",
+    "address": [{
+		"member_address": "",
+        "zipcode": "",
+        "state": "",
+        "city": ""
+    }, {
+		"member_address": "",
+        "zipcode": "",
+        "state": "",
+        "city": ""
+    }],
+
+    "phone": "",
+    "email": "",
+    "password": "",
+
+    "membership": [{
+        "type": "",
+        "limit_per_month": "",
+        "monthly_price": "",
+        "monthly_tax":  "",
+        "lost_price": ""
+    }, {
+        "type": "",
+        "limit_per_month": "",
+        "monthly_price": "",
+        "monthly_tax":  "",
+        "lost_price": ""
+    }],
+
+
+    "payment": [{
+        "amount_paid" : "",
+        "amount_paid_date" : "",
+        "amount_paid_until_date": ""
+    }, {
+        "amount_paid" : "",
+        "amount_paid_date" : "",
+        "amount_paid_until_date": ""
+    }],
+
+    "rental_queue": [{
+        "dvd_id": "",
+        "date_added_in_queue": ""
+    }, {
+        "dvd_id": "",
+        "date_added_in_queue": ""
+    }],
+
+    "member_since_date": ""
+
+}

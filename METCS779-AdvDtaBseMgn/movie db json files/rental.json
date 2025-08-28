@@ -1,0 +1,11 @@
+{
+    "member_id": {
+        "$oid": ""
+    },
+    "dvd_id": {
+        "$oid": ""
+    },
+    "rental_request_date": "",
+    "rental_shipped_date": "",
+    "rental_returned_date": ""
+}

@@ -1,0 +1,27 @@
+{
+    "_id": "",
+    "title": "",
+    "genre": ["genre_1", "genre_2"],
+    "rating": [{
+        "rating_name": "",
+        "rating_description": ""
+    },{
+        "rating_name": "",
+        "rating_description": ""
+    }],
+
+    "release_date": "",
+    "theatre_release_date": "",
+    "quantity_on_hand": "",
+    "quantity_on_rent": "",
+    "quantity_lost": "",
+
+    "movie_person": [{
+        "movie_person_id": "",
+        "role_name": []
+    }, {
+        "movie_person_id": "",
+        "role_name": []
+    }]
+ 
+}

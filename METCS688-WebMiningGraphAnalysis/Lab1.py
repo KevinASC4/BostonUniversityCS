@@ -1,0 +1,1 @@
+print(len({i for i in range(10) if bin(i).count('1') % 2 == 0}))

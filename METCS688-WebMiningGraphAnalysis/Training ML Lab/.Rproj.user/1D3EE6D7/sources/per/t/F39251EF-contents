@@ -1,0 +1,21 @@
+#  Examples of ML Regression Models
+rm(list=ls()); cat("\014") # clear all
+library(e1071)
+
+# Data Analysis ==============================================
+# Insert code to load data from the file "data1.csv" and analyze it.
+
+
+# Linear Regression Model ==============================================
+#  Insert code related to the Linear Regression model and analyze the predictions. 
+
+# Non-Linear Regression (SVM) Model ==============================================
+#  Insert code related to the Non-Linear Linear Regression model and analyze the predictions. 
+
+
+# Over-Fitted SVM Model ==============================================
+#  Insert code related to the Over-Fitted SVM Model model and analyze the predictions.
+
+
+
+
